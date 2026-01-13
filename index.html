@@ -79,11 +79,98 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .info-card {
+            border-left: 3px solid #333;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+        .tag-pro { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+        .tag-con { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+        .tag-science { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
     </style>
 </head>
 <body class="flex items-center justify-center h-screen w-screen">
 
     <canvas id="visualizer"></canvas>
+
+    <!-- Info Button -->
+    <button id="infoBtn" class="absolute top-6 right-6 z-20 w-10 h-10 rounded-full glass-panel flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    </button>
+
+    <!-- Analysis Modal -->
+    <div id="infoModal" class="modal-overlay fixed inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="glass-panel w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl p-8 relative">
+            <button id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <h2 class="text-2xl font-light tracking-wider mb-6 text-white border-b border-gray-700 pb-4">頻率模式科學分析</h2>
+            
+            <div class="space-y-6">
+                <!-- MIT Click -->
+                <div class="info-card" style="border-color: #facc15">
+                    <h3 class="text-lg font-bold text-yellow-400 mb-2">MIT 脈衝 (Click)</h3>
+                    <div class="mb-2"><span class="tag tag-science">學理最強</span> <span class="tag tag-con">聽感差</span></div>
+                    <p class="text-sm text-gray-300 mb-2">
+                        神經科學研究（如 Tsai et al., Nature）顯示，大腦神經元對「突發、銳利」的聲音反應最強。正弦波太過平滑，容易被大腦適應（Habituation），而 Click 聲能強制神經元同步放電。
+                    </p>
+                    <p class="text-xs text-gray-500">建議：每天 20 分鐘高強度訓練，像吃藥一樣使用，不要當背景音樂。</p>
+                </div>
+
+                <!-- Noise -->
+                <div class="info-card" style="border-color: #f472b6">
+                    <h3 class="text-lg font-bold text-pink-400 mb-2">粉紅噪音 (雨聲/瀑布)</h3>
+                    <div class="mb-2"><span class="tag tag-pro">最佳持久力</span> <span class="tag tag-pro">環境遮蔽</span></div>
+                    <p class="text-sm text-gray-300 mb-2">
+                        利用「隨機共振 (Stochastic Resonance)」原理。背景的寬頻噪音能提高神經系統對微弱 40Hz 訊號的敏感度。同時具有完美的「聲音遮蔽」效果，能蓋過周遭人聲。
+                    </p>
+                    <p class="text-xs text-gray-500">建議：讀書、工作、寫程式時的背景白噪音，可連續聽 2 小時以上。</p>
+                </div>
+
+                <!-- Binaural -->
+                <div class="info-card" style="border-color: #c084fc">
+                    <h3 class="text-lg font-bold text-purple-400 mb-2">雙耳節拍 (Binaural)</h3>
+                    <div class="mb-2"><span class="tag tag-science">半腦同步</span> <span class="tag tag-con">限耳機</span></div>
+                    <p class="text-sm text-gray-300 mb-2">
+                        利用物理幻聽。左耳 200Hz 與右耳 240Hz 在大腦「上橄欖核」整合，產生 40Hz 差頻。這能促進左右腦半球的溝通與同步 (Hemi-Sync)。
+                    </p>
+                    <p class="text-xs text-gray-500">建議：深度冥想、創意發想時使用。工作時若不便戴耳機則無效。</p>
+                </div>
+
+                <!-- Isochronic Music -->
+                <div class="info-card" style="border-color: #38bdf8">
+                    <h3 class="text-lg font-bold text-sky-400 mb-2">等時音樂 (Music)</h3>
+                    <div class="mb-2"><span class="tag tag-pro">最悅耳</span> <span class="tag tag-con">訊號稀釋</span></div>
+                    <p class="text-sm text-gray-300 mb-2">
+                        將悅耳的和弦進行振幅調變 (AM)。這是「依從性」最高的模式。雖然因為音樂本身的頻率複雜度會稍微稀釋 40Hz 的純度，但因為「聽得下去」，長期效果往往優於聽不下去的純音。
+                    </p>
+                    <p class="text-xs text-gray-500">建議：當你覺得其他聲音很煩躁，只想輕鬆進入心流時。</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="controls-wrapper w-full max-w-md p-6 rounded-3xl glass-panel mx-4 flex flex-col max-h-[90vh]">
         
@@ -182,6 +269,25 @@
             document.documentElement.style.setProperty('--theme-color', color);
             document.documentElement.style.setProperty('--glow-color', glow);
         }
+
+        // Modal Logic
+        const infoBtn = document.getElementById('infoBtn');
+        const infoModal = document.getElementById('infoModal');
+        const closeModal = document.getElementById('closeModal');
+
+        infoBtn.addEventListener('click', () => {
+            infoModal.classList.add('open');
+        });
+
+        closeModal.addEventListener('click', () => {
+            infoModal.classList.remove('open');
+        });
+
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.classList.remove('open');
+            }
+        });
         
         // --- Audio Engine ---
         class AudioEngine {
