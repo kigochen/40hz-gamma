@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>40Hz 專注波產生器</title>
+    <title>40Hz 專注波產生器 Pro Max</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
         
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #050505;
-            overflow: hidden; /* 防止捲軸 */
+            overflow: hidden;
             color: white;
         }
 
-        /* 自定義滑桿樣式 */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -40,7 +39,10 @@
         }
         
         .mode-btn {
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mode-btn:hover {
+            background-color: rgba(255,255,255,0.05);
         }
         .mode-btn.active {
             background-color: var(--theme-color, #4ade80);
@@ -49,11 +51,11 @@
             box-shadow: 0 0 15px var(--glow-color, rgba(74, 222, 128, 0.4));
         }
 
-        /* 控制面板玻璃擬態 */
         .glass-panel {
-            background: rgba(20, 20, 20, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(18, 18, 18, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         
         #visualizer {
@@ -69,102 +71,134 @@
             position: relative;
             z-index: 10;
         }
-
-        /* 按鈕圖示動態 */
-        .play-ring {
-            stroke: var(--theme-color, #4ade80);
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
 <body class="flex items-center justify-center h-screen w-screen">
 
-    <!-- 背景視覺化 Canvas -->
     <canvas id="visualizer"></canvas>
 
-    <!-- 控制面板 -->
-    <div class="controls-wrapper w-full max-w-md p-6 rounded-2xl glass-panel shadow-2xl mx-4">
+    <div class="controls-wrapper w-full max-w-md p-6 rounded-3xl glass-panel mx-4 flex flex-col max-h-[90vh]">
         
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-light tracking-widest text-white mb-2">GAMMA <span id="freqTitle" class="font-bold" style="color: var(--theme-color, #4ade80)">40Hz</span></h1>
-            <p class="text-xs text-gray-400 tracking-wide">神經專注與認知增強音頻</p>
+        <div class="text-center mb-6 shrink-0">
+            <h1 class="text-2xl font-light tracking-[0.2em] text-white mb-1">GAMMA <span id="freqTitle" class="font-bold" style="color: var(--theme-color, #4ade80)">40Hz</span></h1>
+            <p class="text-[10px] text-gray-400 tracking-wider uppercase opacity-70">Neural Entrainment Engine</p>
         </div>
 
-        <!-- 播放控制 -->
-        <div class="flex justify-center mb-8">
-            <button id="playBtn" class="w-20 h-20 rounded-full border-2 flex items-center justify-center hover:bg-white/5 transition-all duration-300 group" style="border-color: var(--theme-color, #4ade80)">
-                <!-- Play Icon -->
-                <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 group-hover:scale-110 transition-transform ml-1" style="color: var(--theme-color, #4ade80)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex justify-center mb-6 shrink-0">
+            <button id="playBtn" class="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/5 transition-all duration-300 group relative">
+                <div class="absolute inset-0 rounded-full border-2 opacity-0 transition-all duration-500 group-hover:opacity-100" style="border-color: var(--theme-color, #4ade80); filter: blur(4px);"></div>
+                <div class="absolute inset-0 rounded-full border-2 transition-all duration-300" style="border-color: var(--theme-color, #4ade80)"></div>
+                
+                <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 relative z-10 group-hover:scale-110 transition-transform ml-1" style="color: var(--theme-color, #4ade80)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <!-- Stop Icon (Hidden by default) -->
-                <svg id="stopIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden group-hover:scale-110 transition-transform" style="color: var(--theme-color, #4ade80)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg id="stopIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden relative z-10 group-hover:scale-110 transition-transform" style="color: var(--theme-color, #4ade80)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
                 </svg>
             </button>
         </div>
 
-        <!-- 模式選擇 -->
-        <div class="grid grid-cols-3 gap-3 mb-8">
-            <button id="modeRaw" class="mode-btn active p-3 rounded-xl border border-gray-700 text-sm font-medium flex flex-col items-center justify-center gap-1 h-24">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>原聲</span>
-                <span class="text-[9px] opacity-60">單聲道純音</span>
+        <div class="grid grid-cols-2 gap-3 mb-6 overflow-y-auto no-scrollbar" style="max-height: 280px;">
+            <!-- 1. Music (Isochronic) -->
+            <button id="modeIsochronic" class="mode-btn p-3 rounded-xl border border-gray-700/50 text-left relative group h-20 active">
+                <div class="font-bold text-sm mb-1">等時音樂</div>
+                <div class="text-[10px] opacity-60 leading-tight">悅耳的 40Hz 顫音和弦<br>適合長時間讀書</div>
+                <div class="absolute top-3 right-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
+                </div>
             </button>
-            <button id="modeBinaural" class="mode-btn p-3 rounded-xl border border-gray-700 text-sm font-medium flex flex-col items-center justify-center gap-1 h-24">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-                <span>雙耳</span>
-                <span class="text-[9px] opacity-60">需戴耳機</span>
+            
+            <!-- 2. Binaural -->
+            <button id="modeBinaural" class="mode-btn p-3 rounded-xl border border-gray-700/50 text-left relative group h-20">
+                <div class="font-bold text-sm mb-1">雙耳節拍</div>
+                <div class="text-[10px] opacity-60 leading-tight">左右腦同步化<br><span class="text-[9px] border border-current px-1 rounded">需戴耳機</span></div>
+                <div class="absolute top-3 right-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                </div>
             </button>
-            <button id="modeIsochronic" class="mode-btn p-3 rounded-xl border border-gray-700 text-sm font-medium flex flex-col items-center justify-center gap-1 h-24">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-                <span>音樂</span>
-                <span class="text-[9px] opacity-60">40Hz 脈衝</span>
+
+            <!-- 3. Pink Noise (Rain) -->
+            <button id="modeNoise" class="mode-btn p-3 rounded-xl border border-gray-700/50 text-left relative group h-20">
+                <div class="font-bold text-sm mb-1">粉紅噪音 (暖雨)</div>
+                <div class="text-[10px] opacity-60 leading-tight">低頻濾波處理<br>深沉厚實的雨聲</div>
+                <div class="absolute top-3 right-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
+                </div>
+            </button>
+
+            <!-- 4. Pink Noise (Waterfall) -->
+            <button id="modeWaterfall" class="mode-btn p-3 rounded-xl border border-gray-700/50 text-left relative group h-20">
+                <div class="font-bold text-sm mb-1">粉紅噪音 (瀑布)</div>
+                <div class="text-[10px] opacity-60 leading-tight">保留高頻水氣聲<br>強勁的沖刷感</div>
+                <div class="absolute top-3 right-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+            </button>
+
+            <!-- 5. MIT Click -->
+            <button id="modeClick" class="mode-btn p-3 rounded-xl border border-gray-700/50 text-left relative group h-20">
+                <div class="font-bold text-sm mb-1">MIT 脈衝 (清脆)</div>
+                <div class="text-[10px] opacity-60 leading-tight">高頻響板聲<br>短促精確的點擊</div>
+                <div class="absolute top-3 right-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+            </button>
+
+             <!-- 6. Raw Sine -->
+             <button id="modeRaw" class="mode-btn p-3 rounded-xl border border-gray-700/50 text-left relative group h-20">
+                <div class="font-bold text-sm mb-1">原聲正弦波</div>
+                <div class="text-[10px] opacity-60 leading-tight">實驗室基準 40Hz<br>物理純音對照</div>
+                <div class="absolute top-3 right-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                </div>
             </button>
         </div>
 
-        <!-- 音量控制 -->
-        <div class="mb-4">
+        <div class="mb-4 shrink-0">
             <div class="flex justify-between text-xs text-gray-400 mb-2">
-                <span>音量</span>
+                <span>Master Volume</span>
                 <span id="volValue">50%</span>
             </div>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
         </div>
 
-        <p id="modeDesc" class="text-[10px] text-center text-gray-500 mt-6 min-h-[1.5em]">
-            產生單一 40Hz 正弦波，最直接的物理刺激。
+        <p id="modeDesc" class="text-[11px] text-center text-gray-400 mt-2 min-h-[1.5em] px-4 font-light">
+            選擇模式以開始。
         </p>
     </div>
 
     <script>
-        // 設定 CSS 變數的 Helper
         function setTheme(color, glow) {
             document.documentElement.style.setProperty('--theme-color', color);
             document.documentElement.style.setProperty('--glow-color', glow);
         }
-        setTheme('#4ade80', 'rgba(74, 222, 128, 0.4)'); // Default Green
-
+        
         // --- Audio Engine ---
         class AudioEngine {
             constructor() {
                 this.audioCtx = null;
                 this.isPlaying = false;
-                this.mode = 'raw'; // 'raw', 'binaural', 'isochronic'
+                this.mode = 'isochronic'; 
                 this.masterGain = null;
                 this.analyser = null;
-                this.nodes = []; // Track all active nodes to stop cleanly
+                this.nodes = []; 
                 
-                // Config
                 this.baseFreq = 200; 
                 this.targetGamma = 40;
+                
+                this.pinkNoiseBuffer = null;
+                this.whiteNoiseBuffer = null;
+                this.pulseCurve = null;
             }
 
             init() {
@@ -177,11 +211,56 @@
 
                     this.analyser = this.audioCtx.createAnalyser();
                     this.analyser.fftSize = 2048;
-                    this.analyser.smoothingTimeConstant = 0.8;
+                    this.analyser.smoothingTimeConstant = 0.85;
 
                     this.masterGain.connect(this.analyser);
                     this.analyser.connect(this.audioCtx.destination);
+
+                    this.pinkNoiseBuffer = this.createPinkNoiseBuffer(2);
+                    this.whiteNoiseBuffer = this.createWhiteNoiseBuffer(2);
+                    this.pulseCurve = this.createPulseCurve(0.1); // 10% duty cycle for clicks
                 }
+            }
+
+            // Custom Curve for PWM (Pulse Width Modulation) to create sharp clicks
+            createPulseCurve(dutyCycle) {
+                const samples = 256;
+                const curve = new Float32Array(samples);
+                for (let i = 0; i < samples; i++) {
+                    const x = (i / (samples - 1)) * 2 - 1;
+                    curve[i] = x > (1 - dutyCycle * 2) ? 1 : 0;
+                }
+                return curve;
+            }
+
+            createPinkNoiseBuffer(seconds) {
+                const bufferSize = this.audioCtx.sampleRate * seconds;
+                const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                let b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    data[i] *= 0.11; 
+                    b6 = white * 0.115926;
+                }
+                return buffer;
+            }
+
+            createWhiteNoiseBuffer(seconds) {
+                const bufferSize = this.audioCtx.sampleRate * seconds;
+                const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * 0.5;
+                }
+                return buffer;
             }
 
             setVolume(val) {
@@ -202,12 +281,11 @@
                 if (this.audioCtx.state === 'suspended') {
                     this.audioCtx.resume();
                 }
-                this.stop(); // Clear previous
+                this.stop(); 
                 this.isPlaying = true;
                 const t = this.audioCtx.currentTime;
 
                 if (this.mode === 'raw') {
-                    // --- Raw 40Hz ---
                     const osc = this.audioCtx.createOscillator();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(40, t);
@@ -216,15 +294,14 @@
                     this.nodes.push(osc);
 
                 } else if (this.mode === 'binaural') {
-                    // --- Binaural Beats ---
                     const leftFreq = this.baseFreq;
                     const rightFreq = this.baseFreq + this.targetGamma;
-
+                    
                     const oscL = this.audioCtx.createOscillator();
                     oscL.frequency.setValueAtTime(leftFreq, t);
                     const panL = this.audioCtx.createStereoPanner();
                     panL.pan.setValueAtTime(-1, t);
-
+                    
                     const oscR = this.audioCtx.createOscillator();
                     oscR.frequency.setValueAtTime(rightFreq, t);
                     const panR = this.audioCtx.createStereoPanner();
@@ -233,63 +310,126 @@
                     oscL.connect(panL).connect(this.masterGain);
                     oscR.connect(panR).connect(this.masterGain);
 
-                    oscL.start();
-                    oscR.start();
+                    oscL.start(); oscR.start();
                     this.nodes.push(oscL, oscR, panL, panR);
 
                 } else if (this.mode === 'isochronic') {
-                    // --- Isochronic Tones (Musical Drone) ---
-                    // 1. Create a "Drone Chord" (Carrier)
-                    // Using A Minor 7th chord frequencies for a relaxing pad
-                    // A2(110), E3(164.8), G3(196), C4(261.6)
                     const chordFreqs = [110, 164.81, 196.00, 261.63];
-                    
-                    // Create a gain node for the drone BEFORE the pulse
                     const droneGain = this.audioCtx.createGain();
-                    droneGain.gain.value = 0; // Starts at 0, modulated by LFO
+                    droneGain.gain.value = 0; 
                     droneGain.connect(this.masterGain);
                     this.nodes.push(droneGain);
 
                     chordFreqs.forEach(freq => {
                         const osc = this.audioCtx.createOscillator();
-                        osc.type = 'triangle'; // Richer sound than sine
+                        osc.type = 'triangle';
                         osc.frequency.setValueAtTime(freq, t);
-                        
-                        // Detune slightly for warmth
-                        osc.detune.setValueAtTime(Math.random() * 10 - 5, t);
-
-                        // Mix individual notes down so they don't clip
+                        osc.detune.setValueAtTime(Math.random() * 8 - 4, t);
                         const noteGain = this.audioCtx.createGain();
-                        noteGain.gain.value = 0.15; 
-                        
+                        noteGain.gain.value = 0.15;
                         osc.connect(noteGain).connect(droneGain);
                         osc.start();
                         this.nodes.push(osc, noteGain);
                     });
 
-                    // 2. The Modulator (LFO) - 40Hz
-                    // This creates the "Pulse"
+                    const lfo = this.audioCtx.createOscillator();
+                    lfo.frequency.setValueAtTime(40, t);
+                    droneGain.gain.setValueAtTime(0.5, t);
+                    const lfoGain = this.audioCtx.createGain();
+                    lfoGain.gain.value = 0.5;
+                    lfo.connect(lfoGain).connect(droneGain.gain);
+                    lfo.start();
+                    this.nodes.push(lfo, lfoGain);
+
+                } else if (this.mode === 'noise') {
+                    // --- PINK NOISE (Rain) ---
+                    const noiseSource = this.audioCtx.createBufferSource();
+                    noiseSource.buffer = this.pinkNoiseBuffer;
+                    noiseSource.loop = true;
+                    
+                    // Filter: LowPass at 800Hz (Muffled, like rain outside)
+                    const filter = this.audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, t);
+
+                    const noiseGain = this.audioCtx.createGain();
+                    noiseGain.gain.value = 0; 
+                    
+                    noiseSource.connect(filter).connect(noiseGain).connect(this.masterGain);
+                    
                     const lfo = this.audioCtx.createOscillator();
                     lfo.type = 'sine';
                     lfo.frequency.setValueAtTime(40, t);
-
-                    // 3. Modulate the Drone's gain
-                    // We want the gain to oscillate between 0 and 1 (approx)
-                    // Math: Gain = Base + (LFO * Depth)
-                    // If we connect LFO directly to gain, it adds to the base value.
-                    // We want: 0.5 + (0.5 * sin(40Hz)) -> swings 0.0 to 1.0
                     
-                    // Set base volume of the drone
-                    droneGain.gain.setValueAtTime(0.5, t); 
-                    
-                    // Create a gain for the LFO to control depth
+                    noiseGain.gain.setValueAtTime(0.6, t); 
                     const lfoGain = this.audioCtx.createGain();
-                    lfoGain.gain.value = 0.5; // Depth of modulation
+                    lfoGain.gain.value = 0.4; 
                     
-                    lfo.connect(lfoGain).connect(droneGain.gain);
+                    lfo.connect(lfoGain).connect(noiseGain.gain);
+                    
+                    noiseSource.start();
                     lfo.start();
+                    this.nodes.push(noiseSource, filter, noiseGain, lfo, lfoGain);
+
+                } else if (this.mode === 'waterfall') {
+                    // --- PINK NOISE (Waterfall) ---
+                    const noiseSource = this.audioCtx.createBufferSource();
+                    noiseSource.buffer = this.pinkNoiseBuffer;
+                    noiseSource.loop = true;
                     
-                    this.nodes.push(lfo, lfoGain);
+                    // Filter: LowPass at 3000Hz (Much higher than rain, keeps the "spray" sound)
+                    // This creates a "white noise wall" effect similar to a waterfall
+                    const filter = this.audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(3000, t);
+
+                    const noiseGain = this.audioCtx.createGain();
+                    noiseGain.gain.value = 0; 
+                    
+                    noiseSource.connect(filter).connect(noiseGain).connect(this.masterGain);
+                    
+                    // LFO: Smooth Sine wave modulation at 40Hz
+                    const lfo = this.audioCtx.createOscillator();
+                    lfo.type = 'sine';
+                    lfo.frequency.setValueAtTime(40, t);
+                    
+                    noiseGain.gain.setValueAtTime(0.6, t); 
+                    const lfoGain = this.audioCtx.createGain();
+                    lfoGain.gain.value = 0.4; 
+                    
+                    lfo.connect(lfoGain).connect(noiseGain.gain);
+                    
+                    noiseSource.start();
+                    lfo.start();
+                    this.nodes.push(noiseSource, filter, noiseGain, lfo, lfoGain);
+
+                } else if (this.mode === 'click') {
+                    // --- MIT CLICK ---
+                    const noiseSource = this.audioCtx.createBufferSource();
+                    noiseSource.buffer = this.whiteNoiseBuffer;
+                    noiseSource.loop = true;
+
+                    const filter = this.audioCtx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.setValueAtTime(1500, t);
+
+                    const clickGain = this.audioCtx.createGain();
+                    clickGain.gain.value = 0; 
+                    
+                    noiseSource.connect(filter).connect(clickGain).connect(this.masterGain);
+
+                    const lfo = this.audioCtx.createOscillator();
+                    lfo.type = 'sawtooth';
+                    lfo.frequency.setValueAtTime(40, t);
+
+                    const shaper = this.audioCtx.createWaveShaper();
+                    shaper.curve = this.pulseCurve;
+
+                    lfo.connect(shaper).connect(clickGain.gain);
+                    
+                    noiseSource.start();
+                    lfo.start();
+                    this.nodes.push(noiseSource, filter, clickGain, lfo, shaper);
                 }
             }
 
@@ -331,11 +471,9 @@
             const centerX = width / 2;
             const centerY = height / 2;
 
-            // Clear
             ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
             ctx.fillRect(0, 0, width, height);
 
-            // Idle state
             if (!audioEngine.isPlaying) {
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
@@ -348,24 +486,30 @@
             const data = audioEngine.getAnalysisData();
             if (data.length === 0) return;
 
-            // Color selection
-            let r, g, b;
-            if (audioEngine.mode === 'raw') { [r,g,b] = [74, 222, 128]; } // Green
-            else if (audioEngine.mode === 'binaural') { [r,g,b] = [192, 132, 252]; } // Purple
-            else { [r,g,b] = [56, 189, 248]; } // Blue (Isochronic)
+            const colorVar = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
+            let r=74, g=222, b=128; 
+            if(colorVar.startsWith('#')) {
+                r = parseInt(colorVar.substr(1,2), 16);
+                g = parseInt(colorVar.substr(3,2), 16);
+                b = parseInt(colorVar.substr(5,2), 16);
+            }
 
-            // Draw Wave
             ctx.lineWidth = 2;
             ctx.beginPath();
             
-            // Adjust radius based on mode - Isochronic needs more visible movement
+            const isClick = audioEngine.mode === 'click';
             let baseRadius = Math.min(width, height) / 3.5;
             
-            for (let i = 0; i < data.length; i+=2) {
+            for (let i = 0; i < data.length; i+= (isClick ? 1 : 2)) {
                 const v = data[i] / 128.0; 
-                const offset = (v - 1) * (audioEngine.mode === 'isochronic' ? 80 : 50); // More movement for music
-                const angle = (i / data.length) * Math.PI * 2;
+                let offset = (v - 1) * 60;
                 
+                // Visualizer adjustment: Make clicks look sharper
+                if (isClick) {
+                    offset = offset > 0 ? offset * 2.5 : offset; // Spike outward only
+                }
+
+                const angle = (i / data.length) * Math.PI * 2;
                 const r_final = baseRadius + offset;
                 const x = centerX + Math.cos(angle) * r_final;
                 const y = centerY + Math.sin(angle) * r_final;
@@ -381,7 +525,6 @@
             ctx.stroke();
             ctx.shadowBlur = 0;
 
-            // Inner Pulse
             let sum = 0;
             for(let i = 0; i < data.length; i++) sum += Math.abs(data[i] - 128);
             const avg = sum / data.length;
@@ -392,7 +535,6 @@
             ctx.fill();
         }
 
-        // --- App Logic ---
         const audioEngine = new AudioEngine();
         
         const playBtn = document.getElementById('playBtn');
@@ -404,10 +546,45 @@
         const freqTitle = document.getElementById('freqTitle');
 
         const modes = {
-            raw: { btn: document.getElementById('modeRaw'), color: '#4ade80', glow: 'rgba(74, 222, 128, 0.4)', desc: '產生單一 40Hz 正弦波，最直接的物理刺激。' },
-            binaural: { btn: document.getElementById('modeBinaural'), color: '#c084fc', glow: 'rgba(192, 132, 252, 0.4)', desc: '左耳 200Hz / 右耳 240Hz，大腦合成 40Hz。需戴耳機。' },
-            isochronic: { btn: document.getElementById('modeIsochronic'), color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.4)', desc: '將和弦音量每秒開關 40 次，兼具悅耳度與專注效果。' }
+            isochronic: { 
+                btn: document.getElementById('modeIsochronic'), 
+                color: '#38bdf8', 
+                glow: 'rgba(56, 189, 248, 0.5)', 
+                desc: '【等時音樂】A小調和弦，每秒40次顫音。適合長時間工作、閱讀背景音。' 
+            },
+            binaural: { 
+                btn: document.getElementById('modeBinaural'), 
+                color: '#c084fc', 
+                glow: 'rgba(192, 132, 252, 0.5)', 
+                desc: '【雙耳節拍】左耳200Hz / 右耳240Hz。利用相位差合成。需戴耳機。' 
+            },
+            noise: { 
+                btn: document.getElementById('modeNoise'), 
+                color: '#f472b6', 
+                glow: 'rgba(244, 114, 182, 0.5)', 
+                desc: '【粉紅噪音 (暖雨)】濾除高頻的柔和雜訊，像雷雨或海浪，最舒適的環境遮蔽。' 
+            },
+            waterfall: { 
+                btn: document.getElementById('modeWaterfall'), 
+                color: '#22d3ee', // Cyan
+                glow: 'rgba(34, 211, 238, 0.5)', 
+                desc: '【粉紅噪音 (瀑布)】保留高頻水氣聲，像置身巨大瀑布旁。強勁的沖刷感。' 
+            },
+            click: { 
+                btn: document.getElementById('modeClick'), 
+                color: '#facc15', 
+                glow: 'rgba(250, 204, 21, 0.5)', 
+                desc: '【MIT 脈衝 (清脆)】高頻短促點擊 (Click)，像精準的電子節拍，物理誘導性最強。' 
+            },
+            raw: { 
+                btn: document.getElementById('modeRaw'), 
+                color: '#4ade80', 
+                glow: 'rgba(74, 222, 128, 0.5)', 
+                desc: '【原聲正弦】實驗室基準 40Hz 純音。最純粹但聽感較單調。' 
+            }
         };
+
+        switchMode('isochronic');
 
         playBtn.addEventListener('click', () => {
             if (audioEngine.isPlaying) {
@@ -423,35 +600,38 @@
             if (isPlaying) {
                 playIcon.classList.add('hidden');
                 stopIcon.classList.remove('hidden');
-                playBtn.style.backgroundColor = `rgba(${hexToRgb(modes[audioEngine.mode].color)}, 0.1)`;
-                playBtn.style.boxShadow = `0 0 20px ${modes[audioEngine.mode].glow}`;
+                const color = modes[audioEngine.mode].color;
+                const glow = modes[audioEngine.mode].glow;
+                playBtn.style.backgroundColor = `rgba(${hexToRgb(color)}, 0.1)`;
+                playBtn.style.boxShadow = `0 0 25px ${glow}`;
+                playBtn.style.borderColor = color;
             } else {
                 playIcon.classList.remove('hidden');
                 stopIcon.classList.add('hidden');
                 playBtn.style.backgroundColor = 'transparent';
                 playBtn.style.boxShadow = 'none';
+                playBtn.style.borderColor = 'rgba(255,255,255,0.2)';
             }
         }
 
         function switchMode(key) {
             audioEngine.setMode(key);
-            
-            // UI Updates
             Object.keys(modes).forEach(k => {
                 const m = modes[k];
                 if (k === key) {
                     m.btn.classList.add('active');
+                    m.btn.classList.remove('border-gray-700/50');
                     setTheme(m.color, m.glow);
                     modeDesc.innerText = m.desc;
                     freqTitle.style.color = m.color;
                     if (audioEngine.isPlaying) updatePlayUI(true);
                 } else {
                     m.btn.classList.remove('active');
+                    m.btn.classList.add('border-gray-700/50');
                 }
             });
         }
 
-        // Bind clicks
         Object.keys(modes).forEach(key => {
             modes[key].btn.addEventListener('click', () => switchMode(key));
         });
@@ -462,7 +642,6 @@
             volValue.innerText = Math.round(v * 100) + '%';
         });
 
-        // Utils
         function hexToRgb(hex) {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? 
@@ -470,7 +649,6 @@
         }
 
         drawVisualizer();
-
     </script>
 </body>
 </html>
